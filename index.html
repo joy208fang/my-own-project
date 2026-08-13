@@ -1,0 +1,752 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>远方 | 个人主页</title>
+    <style>
+        /* ===== 全局重置与变量 ===== */
+        :root {
+            --bg-primary: #f0f5ff;
+            --bg-card: #ffffff;
+            --blue-light: #e8f1ff;
+            --blue-main: #4a90d9;
+            --blue-deep: #2563eb;
+            --blue-accent: #60a5fa;
+            --text-primary: #1e293b;
+            --text-secondary: #64748b;
+            --text-light: #94a3b8;
+            --shadow-sm: 0 2px 8px rgba(74, 144, 217, 0.08);
+            --shadow-md: 0 4px 20px rgba(74, 144, 217, 0.12);
+            --shadow-lg: 0 8px 40px rgba(74, 144, 217, 0.18);
+            --radius: 16px;
+            --radius-sm: 10px;
+            --transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html { scroll-behavior: smooth; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Noto Sans CJK SC', 'Microsoft YaHei', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* 背景装饰 */
+        body::before {
+            content: ''; position: fixed; top: -200px; right: -200px;
+            width: 500px; height: 500px;
+            background: radial-gradient(circle, rgba(96, 165, 250, 0.12) 0%, transparent 70%);
+            border-radius: 50%; pointer-events: none; z-index: 0;
+        }
+        body::after {
+            content: ''; position: fixed; bottom: -150px; left: -150px;
+            width: 400px; height: 400px;
+            background: radial-gradient(circle, rgba(74, 144, 217, 0.08) 0%, transparent 70%);
+            border-radius: 50%; pointer-events: none; z-index: 0;
+        }
+
+        /* ===== 主容器 ===== */
+        .container {
+            max-width: 680px;
+            margin: 0 auto;
+            padding: 24px 20px 60px;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* ===== 英雄卡片（融合首屏） ===== */
+        .hero-card {
+            background: var(--bg-card);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow-md);
+            overflow: hidden;
+            position: relative;
+        }
+
+        .hero-top {
+            background: url('hero-bg.jpg') center top / cover no-repeat;
+            padding: 40px 24px 0;
+            text-align: center;
+            position: relative;
+        }
+
+        .hero-top::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: linear-gradient(180deg, rgba(30, 41, 59, 0.35) 0%, rgba(30, 41, 59, 0.2) 50%, rgba(255, 255, 255, 0.1) 100%);
+            pointer-events: none;
+        }
+
+        .hero-top > * { position: relative; z-index: 1; }
+
+        .name { text-shadow: 0 2px 8px rgba(0,0,0,0.25); }
+        .tagline { text-shadow: 0 1px 4px rgba(0,0,0,0.2); }
+
+        .avatar-wrapper {
+            width: 96px; height: 96px;
+            margin: 0 auto 14px;
+            border-radius: 50%;
+            overflow: hidden;
+            border: 3px solid rgba(255,255,255,0.4);
+            box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+            position: relative;
+            transition: var(--transition);
+        }
+        .avatar-wrapper:hover { transform: scale(1.05); }
+        .avatar-wrapper img { width: 100%; height: 100%; object-fit: cover; }
+
+        .name {
+            font-size: 26px; font-weight: 700; color: white;
+            margin-bottom: 8px; letter-spacing: 1px;
+        }
+        .name .underscore { color: var(--blue-accent); }
+
+        .tagline {
+            font-size: 14px; color: rgba(255,255,255,0.85);
+            display: inline-block; padding: 6px 18px;
+            background: rgba(255,255,255,0.15);
+            border-radius: 20px; font-weight: 500;
+            margin-bottom: 28px;
+            backdrop-filter: blur(4px);
+        }
+
+        /* 信息模块区（融合在卡片下半部） */
+        .hero-info {
+            padding: 24px 24px 28px;
+            display: grid;
+            gap: 0;
+        }
+
+        .info-row {
+            display: flex;
+            align-items: flex-start;
+            gap: 14px;
+            padding: 16px 0;
+            border-bottom: 1px solid #f0f4f8;
+        }
+        .info-row:last-child { border-bottom: none; padding-bottom: 0; }
+        .info-row:first-child { padding-top: 0; }
+
+        .info-icon {
+            width: 36px; height: 36px;
+            border-radius: 10px;
+            display: flex; align-items: center; justify-content: center;
+            flex-shrink: 0;
+        }
+        .info-icon.doing { background: #dbeafe; }
+        .info-icon.interest { background: #e0f2fe; }
+        .info-icon.highlight { background: #ede9fe; }
+
+        .info-body { flex: 1; min-width: 0; }
+
+        .info-label {
+            font-size: 12px; font-weight: 600;
+            color: var(--text-light);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 4px;
+        }
+
+        .info-content {
+            font-size: 15px; color: var(--text-primary);
+            line-height: 1.6;
+        }
+
+        .tags { display: flex; flex-wrap: wrap; gap: 8px; }
+        .tag {
+            font-size: 13px; padding: 4px 12px;
+            border-radius: 6px;
+            background: var(--blue-light); color: var(--blue-deep);
+            font-weight: 500; transition: var(--transition);
+        }
+        .tag:hover { background: var(--blue-accent); color: white; }
+
+        .highlight-text {
+            font-size: 15px; color: var(--text-primary);
+            line-height: 1.6; font-style: italic;
+            border-left: 3px solid var(--blue-accent);
+            padding-left: 14px;
+        }
+
+        /* ===== 聊天引导按钮 ===== */
+        .chat-cta {
+            margin-top: 20px;
+            background: var(--bg-card);
+            border-radius: var(--radius);
+            padding: 20px 24px;
+            box-shadow: var(--shadow-sm);
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            cursor: pointer;
+            transition: var(--transition);
+            border: 1px solid transparent;
+        }
+        .chat-cta:hover {
+            box-shadow: var(--shadow-md);
+            border-color: var(--blue-light);
+            transform: translateY(-2px);
+        }
+
+        .chat-cta-icon {
+            width: 48px; height: 48px;
+            border-radius: 14px;
+            background: linear-gradient(135deg, var(--blue-main), var(--blue-deep));
+            display: flex; align-items: center; justify-content: center;
+            flex-shrink: 0;
+            color: white;
+        }
+
+        .chat-cta-text { flex: 1; }
+        .chat-cta-title { font-size: 16px; font-weight: 600; color: var(--text-primary); }
+        .chat-cta-desc { font-size: 13px; color: var(--text-secondary); margin-top: 2px; }
+
+        .chat-cta-arrow {
+            color: var(--blue-main);
+            font-size: 20px;
+            transition: var(--transition);
+        }
+        .chat-cta:hover .chat-cta-arrow { transform: translateX(4px); }
+
+        /* ===== 页脚 ===== */
+        .footer {
+            text-align: center;
+            padding: 28px 0 0;
+            font-size: 12px;
+            color: var(--text-light);
+        }
+
+        /* ===== 悬浮聊天面板 ===== */
+        .chat-fab {
+            position: fixed;
+            bottom: 24px; right: 24px;
+            width: 60px; height: 60px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--blue-main), var(--blue-deep));
+            box-shadow: 0 4px 20px rgba(37, 99, 235, 0.35);
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer; z-index: 1000;
+            transition: var(--transition);
+            color: white;
+        }
+        .chat-fab:hover { transform: scale(1.08); box-shadow: 0 6px 28px rgba(37, 99, 235, 0.45); }
+        .chat-fab.hidden { transform: scale(0); opacity: 0; pointer-events: none; }
+
+        .chat-fab-badge {
+            position: absolute;
+            top: -2px; right: -2px;
+            width: 16px; height: 16px;
+            background: #ef4444;
+            border-radius: 50%;
+            border: 2px solid white;
+            font-size: 9px;
+            display: flex; align-items: center; justify-content: center;
+            color: white; font-weight: 700;
+        }
+
+        .chat-panel {
+            position: fixed;
+            bottom: 24px; right: 24px;
+            width: 380px;
+            height: 560px;
+            max-height: calc(100vh - 48px);
+            background: var(--bg-card);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow-lg);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            z-index: 1001;
+            transform: scale(0);
+            transform-origin: bottom right;
+            opacity: 0;
+            transition: var(--transition);
+            pointer-events: none;
+        }
+        .chat-panel.open {
+            transform: scale(1);
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .chat-header {
+            display: flex; align-items: center; gap: 12px;
+            padding: 14px 16px;
+            background: linear-gradient(135deg, var(--blue-main), var(--blue-deep));
+            color: white;
+        }
+
+        .chat-avatar {
+            width: 40px; height: 40px;
+            border-radius: 50%; overflow: hidden;
+            border: 2px solid rgba(255,255,255,0.3);
+            flex-shrink: 0;
+        }
+        .chat-avatar img { width: 100%; height: 100%; object-fit: cover; }
+
+        .chat-title-group { flex: 1; }
+        .chat-title { font-size: 15px; font-weight: 600; }
+        .chat-status { font-size: 12px; opacity: 0.85; display: flex; align-items: center; gap: 5px; }
+
+        .status-dot {
+            width: 8px; height: 8px;
+            background: #4ade80; border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+
+        .chat-close {
+            width: 32px; height: 32px;
+            border: none; background: rgba(255,255,255,0.15);
+            border-radius: 8px; color: white;
+            cursor: pointer; transition: var(--transition);
+            display: flex; align-items: center; justify-content: center;
+            flex-shrink: 0;
+        }
+        .chat-close:hover { background: rgba(255,255,255,0.25); }
+
+        .chat-messages {
+            flex: 1; overflow-y: auto;
+            padding: 16px;
+            display: flex; flex-direction: column;
+            gap: 12px; scroll-behavior: smooth;
+        }
+        .chat-messages::-webkit-scrollbar { width: 4px; }
+        .chat-messages::-webkit-scrollbar-track { background: transparent; }
+        .chat-messages::-webkit-scrollbar-thumb { background: var(--blue-light); border-radius: 4px; }
+
+        .message {
+            display: flex; gap: 8px;
+            max-width: 85%;
+            animation: slideIn 0.3s ease;
+        }
+        @keyframes slideIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+        .message.bot { align-self: flex-start; }
+        .message.user { align-self: flex-end; flex-direction: row-reverse; }
+
+        .message-avatar {
+            width: 30px; height: 30px;
+            border-radius: 50%; flex-shrink: 0;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 12px; color: white;
+        }
+        .message.bot .message-avatar { background: var(--blue-main); }
+        .message.user .message-avatar { background: var(--text-secondary); }
+
+        .message-bubble {
+            padding: 10px 14px; border-radius: 14px;
+            font-size: 14px; line-height: 1.6; word-break: break-word;
+        }
+        .message.bot .message-bubble { background: var(--blue-light); color: var(--text-primary); border-bottom-left-radius: 4px; }
+        .message.user .message-bubble { background: var(--blue-main); color: white; border-bottom-right-radius: 4px; }
+
+        .typing-indicator { display: flex; gap: 4px; padding: 10px 14px; }
+        .typing-indicator span {
+            width: 7px; height: 7px;
+            background: var(--blue-accent); border-radius: 50%;
+            animation: typingBounce 1.4s infinite;
+        }
+        .typing-indicator span:nth-child(2) { animation-delay: 0.2s; }
+        .typing-indicator span:nth-child(3) { animation-delay: 0.4s; }
+        @keyframes typingBounce { 0%, 60%, 100% { transform: translateY(0); opacity: 0.4; } 30% { transform: translateY(-6px); opacity: 1; } }
+
+        .quick-replies { display: flex; gap: 6px; padding: 0 12px 8px; flex-wrap: wrap; }
+        .quick-reply {
+            font-size: 12px; padding: 6px 12px;
+            border-radius: 16px;
+            background: var(--blue-light); color: var(--blue-deep);
+            border: 1px solid transparent; cursor: pointer;
+            transition: var(--transition); white-space: nowrap;
+        }
+        .quick-reply:hover { background: white; border-color: var(--blue-accent); transform: translateY(-1px); }
+
+        .chat-input-area {
+            display: flex; gap: 8px;
+            padding: 12px 14px;
+            border-top: 1px solid #f0f0f0;
+            background: #fafbfc;
+        }
+        .chat-input {
+            flex: 1; border: 1px solid #e2e8f0;
+            border-radius: 22px; padding: 10px 16px;
+            font-size: 14px; outline: none;
+            transition: var(--transition); font-family: inherit; background: white;
+        }
+        .chat-input:focus { border-color: var(--blue-accent); box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.1); }
+        .chat-input::placeholder { color: var(--text-light); }
+
+        .chat-send {
+            width: 42px; height: 42px;
+            border: none; border-radius: 50%;
+            background: var(--blue-main); color: white;
+            cursor: pointer; transition: var(--transition);
+            display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+        }
+        .chat-send:hover { background: var(--blue-deep); transform: scale(1.05); }
+        .chat-send:active { transform: scale(0.95); }
+
+        /* 遮罩层（手机端） */
+        .chat-overlay {
+            position: fixed; inset: 0;
+            background: rgba(0,0,0,0.3);
+            z-index: 999;
+            opacity: 0; pointer-events: none;
+            transition: var(--transition);
+        }
+        .chat-overlay.show { opacity: 1; pointer-events: auto; }
+
+        /* ===== 响应式 ===== */
+        @media (max-width: 600px) {
+            .container { padding: 16px 14px 40px; }
+            .hero-top { padding: 32px 16px 0; }
+            .avatar-wrapper { width: 80px; height: 80px; }
+            .name { font-size: 22px; }
+            .hero-info { padding: 20px 16px 24px; }
+            .info-row { gap: 10px; padding: 14px 0; }
+            .info-icon { width: 32px; height: 32px; }
+            .info-content { font-size: 14px; }
+            .chat-cta { padding: 16px; gap: 12px; }
+            .chat-cta-icon { width: 42px; height: 42px; }
+            .chat-cta-title { font-size: 15px; }
+
+            /* 手机端聊天面板全宽 */
+            .chat-panel {
+                bottom: 0; right: 0; left: 0;
+                width: 100%;
+                height: 75vh;
+                max-height: 75vh;
+                border-radius: 16px 16px 0 0;
+                transform: translateY(100%);
+                transform-origin: bottom center;
+            }
+            .chat-panel.open { transform: translateY(0); }
+            .chat-fab { bottom: 16px; right: 16px; width: 54px; height: 54px; }
+        }
+
+        @media (max-width: 380px) {
+            .quick-reply { font-size: 11px; padding: 5px 10px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- ===== 英雄卡片（首屏完整信息） ===== -->
+        <div class="hero-card">
+            <div class="hero-top">
+                <div class="avatar-wrapper">
+                    <img src="avatar.jpg" alt="远方">
+                </div>
+                <h1 class="name">_远方<span class="underscore">_</span></h1>
+                <span class="tagline">非码农，一个正在学习用 AI 做产品的新手</span>
+            </div>
+
+            <div class="hero-info">
+                <div class="info-row">
+                    <div class="info-icon doing">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="10"/>
+                            <polyline points="12 6 12 12 16 14"/>
+                        </svg>
+                    </div>
+                    <div class="info-body">
+                        <div class="info-label">最近在做</div>
+                        <p class="info-content">梳理自己的作品方向和兴趣领域，同时也在搭建这个个人主页，探索更多可能性。</p>
+                    </div>
+                </div>
+
+                <div class="info-row">
+                    <div class="info-icon interest">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0ea5e9" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+                        </svg>
+                    </div>
+                    <div class="info-body">
+                        <div class="info-label">兴趣领域</div>
+                        <div class="tags">
+                            <span class="tag">AI 应用</span>
+                            <span class="tag">旅居</span>
+                            <span class="tag">网球</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="info-row">
+                    <div class="info-icon highlight">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#8b5cf6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+                        </svg>
+                    </div>
+                    <div class="info-body">
+                        <div class="info-label">关于我</div>
+                        <p class="highlight-text">即将开启人生下半场，希望可以活出新精彩。</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ===== 聊天引导按钮 ===== -->
+        <div class="chat-cta" onclick="toggleChat(true)">
+            <div class="chat-cta-icon">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                </svg>
+            </div>
+            <div class="chat-cta-text">
+                <div class="chat-cta-title">和我的数字分身聊聊</div>
+                <div class="chat-cta-desc">问我在做什么、有什么兴趣、怎么联系我</div>
+            </div>
+            <div class="chat-cta-arrow">→</div>
+        </div>
+
+        <footer class="footer">
+            <p>© 2026 _远方_ · Built with ❤️ & AI</p>
+        </footer>
+    </div>
+
+    <!-- ===== 悬浮聊天遮罩 ===== -->
+    <div class="chat-overlay" id="chatOverlay" onclick="toggleChat(false)"></div>
+
+    <!-- ===== 悬浮聊天面板 ===== -->
+    <div class="chat-panel" id="chatPanel">
+        <div class="chat-header">
+            <div class="chat-avatar">
+                <img src="avatar.jpg" alt="远方">
+            </div>
+            <div class="chat-title-group">
+                <div class="chat-title">远方的数字分身</div>
+                <div class="chat-status">
+                    <span class="status-dot"></span>
+                    <span>在线 · 随时聊天</span>
+                </div>
+            </div>
+            <button class="chat-close" onclick="toggleChat(false)">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="18" y1="6" x2="6" y2="18"/>
+                    <line x1="6" y1="6" x2="18" y2="18"/>
+                </svg>
+            </button>
+        </div>
+
+        <div class="chat-messages" id="chatMessages">
+            <div class="message bot">
+                <div class="message-avatar">远</div>
+                <div class="message-bubble">
+                    你好！我是远方的数字分身 👋<br>有什么想了解的，尽管问我吧！
+                </div>
+            </div>
+        </div>
+
+        <div class="quick-replies" id="quickReplies">
+            <div class="quick-reply" onclick="sendQuickReply('你现在在做什么？')">你现在在做什么？</div>
+            <div class="quick-reply" onclick="sendQuickReply('你有哪些兴趣爱好？')">你有哪些兴趣爱好？</div>
+            <div class="quick-reply" onclick="sendQuickReply('怎么联系你？')">怎么联系你？</div>
+        </div>
+
+        <div class="chat-input-area">
+            <input type="text" class="chat-input" id="chatInput"
+                placeholder="输入你的问题..."
+                onkeydown="if(event.key==='Enter') sendMessage()">
+            <button class="chat-send" onclick="sendMessage()">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="22" y1="2" x2="11" y2="13"/>
+                    <polygon points="22 2 15 22 11 13 2 9 22 2"/>
+                </svg>
+            </button>
+        </div>
+    </div>
+
+    <!-- ===== 悬浮按钮 ===== -->
+    <div class="chat-fab" id="chatFab" onclick="toggleChat(true)">
+        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+        </svg>
+        <div class="chat-fab-badge">1</div>
+    </div>
+
+    <script>
+        // ===== 悬浮聊天开关 =====
+        const chatPanel = document.getElementById('chatPanel');
+        const chatFab = document.getElementById('chatFab');
+        const chatOverlay = document.getElementById('chatOverlay');
+
+        function toggleChat(open) {
+            if (open) {
+                chatPanel.classList.add('open');
+                chatFab.classList.add('hidden');
+                chatOverlay.classList.add('show');
+                // 隐藏红点
+                const badge = chatFab.querySelector('.chat-fab-badge');
+                if (badge) badge.style.display = 'none';
+                setTimeout(() => {
+                    document.getElementById('chatInput').focus();
+                }, 300);
+            } else {
+                chatPanel.classList.remove('open');
+                chatFab.classList.remove('hidden');
+                chatOverlay.classList.remove('show');
+            }
+        }
+
+        // ===== 数字分身知识库 =====
+        const botKnowledge = {
+            doing: {
+                keywords: ['做什么', '在忙', '工作', '最近', '干嘛', '在干', '职业', '岗位'],
+                replies: [
+                    '我最近主要在做两件事：一是搭建这个个人主页，二是梳理自己的作品方向和兴趣领域。虽然刚从大厂毕业，但我想趁这段时间好好想清楚接下来的方向。',
+                    '目前我在学习AI编程，同时也在整理自己的兴趣和作品方向。这是一个探索和沉淀的阶段。'
+                ]
+            },
+            interests: {
+                keywords: ['兴趣', '爱好', '喜欢', '玩什么', '业余', '休闲'],
+                replies: [
+                    '我的兴趣主要有三个方向：\n1️⃣ AI应用 — 正在学习和实践，觉得这个领域充满可能性\n2️⃣ 旅居 — 喜欢在不同城市生活，体验当地文化\n3️⃣ 网球 — 正在学习中，享受运动带来的快乐',
+                    '我比较喜欢AI应用、旅居和网球。AI是我的学习方向，旅居是生活方式，网球则是我的运动爱好。'
+                ]
+            },
+            contact: {
+                keywords: ['联系', '微信', '邮箱', 'email', '怎么找', '电话', '加你'],
+                replies: [
+                    '你可以直接在这个聊天区和我交流！如果需要更直接的联系方式，可以先留个言，我会尽快回复你 😊',
+                    '目前可以通过这个主页的聊天区和我互动。更多联系方式正在完善中，敬请期待！'
+                ]
+            },
+            skills: {
+                keywords: ['擅长', '技能', '会什么', '方向', '专业', '能力', '内容'],
+                replies: [
+                    '我比较擅长和关心的方向包括：内容表达、AI应用和网球学习。我喜欢把想法通过内容的形式表达出来，同时在AI领域不断探索。',
+                    '我的主要方向是内容表达和AI应用。之前在大厂积累了一些经验，现在想把这些东西整合起来，做出属于自己的作品。'
+                ]
+            },
+            identity: {
+                keywords: ['你是谁', '远方', '名字', '介绍', '自我', '大厂', '毕业'],
+                replies: [
+                    '我是_远方_，一个正在学习AI编程的大厂毕业生。即将开启人生下半场，希望可以活出新精彩 ✨',
+                    '我叫_远方_，之前在大厂工作，现在正在探索自己的兴趣方向。我相信人生有很多可能性，想趁现在去尝试。'
+                ]
+            },
+            life: {
+                keywords: ['人生', '下半场', '未来', '计划', '打算', '梦想', '目标'],
+                replies: [
+                    '我即将开启人生的下半场，希望可以活出新的精彩。虽然不确定未来会怎样，但我想勇敢地去探索和尝试。',
+                    '关于未来，我的想法是：先梳理清楚自己的方向，然后在这个方向上深耕。人生下半场，我想为自己而活。'
+                ]
+            },
+            travel: {
+                keywords: ['旅居', '旅行', '旅游', '城市', '去过', '哪里'],
+                replies: [
+                    '我很喜欢旅居的生活方式，就是在一个城市住上一段时间，深入体验当地的文化和节奏。比起走马观花的旅行，我更享受慢慢融入一个地方的感觉。',
+                    '旅居是我很向往的生活方式。在不同的城市生活、工作、探索，每一次都是全新的体验。'
+                ]
+            },
+            tennis: {
+                keywords: ['网球', '运动', '打球', '锻炼'],
+                replies: [
+                    '我正在学习网球！虽然还是新手，但每次上场都很享受。网球不仅锻炼身体，也让我学会了专注和耐心 🎾',
+                    '网球是我最近在学习的运动，感觉非常有意思。从基础动作到对打，每一步进步都让人很开心。'
+                ]
+            },
+            ai: {
+                keywords: ['ai', '人工智能', '编程', '代码', '技术', '开发'],
+                replies: [
+                    'AI是我目前重点学习的方向。我觉得AI应用不仅仅是技术，更是一种新的思维方式。正在从编程基础开始，逐步深入。',
+                    '我正在学习AI编程，包括AI应用开发、工具使用等。这个主页就是我用AI辅助搭建的，算是一个小小的成果吧！'
+                ]
+            }
+        };
+
+        const defaultReplies = [
+            '这个问题很有意思！你可以试着问问我在做什么、有什么兴趣爱好，或者怎么联系我 😊',
+            '我还在学习中，可能回答不了所有问题。不过关于我的职业、兴趣、联系方式这些，我都很乐意聊！',
+            '嗯…这个我可能需要想想。你可以问我一些关于我的事情，比如最近在做什么、擅长什么方向之类的～'
+        ];
+
+        // ===== 聊天逻辑 =====
+        const chatMessages = document.getElementById('chatMessages');
+        const chatInput = document.getElementById('chatInput');
+        let isTyping = false;
+
+        function addMessage(text, sender) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${sender}`;
+            const avatar = document.createElement('div');
+            avatar.className = 'message-avatar';
+            avatar.textContent = sender === 'bot' ? '远' : '我';
+            const bubble = document.createElement('div');
+            bubble.className = 'message-bubble';
+            bubble.innerHTML = text.replace(/\n/g, '<br>');
+            messageDiv.appendChild(avatar);
+            messageDiv.appendChild(bubble);
+            chatMessages.appendChild(messageDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        function showTyping() {
+            const typingDiv = document.createElement('div');
+            typingDiv.className = 'message bot';
+            typingDiv.id = 'typingIndicator';
+            const avatar = document.createElement('div');
+            avatar.className = 'message-avatar';
+            avatar.textContent = '远';
+            const indicator = document.createElement('div');
+            indicator.className = 'message-bubble typing-indicator';
+            indicator.innerHTML = '<span></span><span></span><span></span>';
+            typingDiv.appendChild(avatar);
+            typingDiv.appendChild(indicator);
+            chatMessages.appendChild(typingDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        function removeTyping() {
+            const typing = document.getElementById('typingIndicator');
+            if (typing) typing.remove();
+        }
+
+        function getReply(userText) {
+            const text = userText.toLowerCase().trim();
+            for (const category in botKnowledge) {
+                const data = botKnowledge[category];
+                for (const keyword of data.keywords) {
+                    if (text.includes(keyword.toLowerCase())) {
+                        const replies = data.replies;
+                        return replies[Math.floor(Math.random() * replies.length)];
+                    }
+                }
+            }
+            if (text.includes('你好') || text.includes('hi') || text.includes('hello') || text.includes('嗨') || text.includes('哈喽')) {
+                return '你好呀！我是远方的数字分身，有什么想了解的尽管问我吧 😊';
+            }
+            if (text.includes('谢谢') || text.includes('感谢') || text.includes('thanks')) {
+                return '不客气！很高兴能帮到你～还有其他想问的吗？';
+            }
+            return defaultReplies[Math.floor(Math.random() * defaultReplies.length)];
+        }
+
+        function sendMessage() {
+            const text = chatInput.value.trim();
+            if (!text || isTyping) return;
+            addMessage(text, 'user');
+            chatInput.value = '';
+            isTyping = true;
+            setTimeout(() => { showTyping(); }, 200);
+            setTimeout(() => {
+                removeTyping();
+                const reply = getReply(text);
+                addMessage(reply, 'bot');
+                isTyping = false;
+            }, 800 + Math.random() * 700);
+        }
+
+        function sendQuickReply(text) {
+            chatInput.value = text;
+            sendMessage();
+        }
+    </script>
+</body>
+</html>
